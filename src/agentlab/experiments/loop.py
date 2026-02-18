@@ -926,6 +926,8 @@ def _get_env_name(task_name: str):
         import browsergym.assistantbench
     elif task_name.startswith("weblinx"):
         import weblinx_browsergym
+    elif task_name.startswith("plbench"):
+        import minPLB.plbench
 
     return f"browsergym/{task_name}"
 
