@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import random
+from typing import Optional
 import uuid
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
@@ -237,6 +238,8 @@ class Study(AbstractStudy):
     ignore_dependencies: bool = False
     avg_step_timeout: int = 60
     demo_mode: bool = False
+    cdp_server_port: Optional[int] = None # whether to expose a CDP server or not on a specific port
+    headless: bool = True
 
     def __post_init__(self):
         """Initialize the study. Set the uuid, and generate the exp_args_list."""
@@ -259,6 +262,8 @@ class Study(AbstractStudy):
             logging_level_stdout=self.logging_level_stdout,
             ignore_dependencies=self.ignore_dependencies,
             demo_mode=self.demo_mode,
+            cdp_server_port=self.cdp_server_port,
+            headless=self.headless
         )
 
     def find_incomplete(self, include_errors=True):
@@ -448,6 +453,8 @@ class Study(AbstractStudy):
         logging_level: int = logging.INFO,
         logging_level_stdout: int = logging.INFO,
         ignore_dependencies=False,
+        cdp_server_port=None, # whether to expose a CDP server or not on a specific port
+        headless=True,
     ):
         """Run one or multiple agents on a benchmark.
 
@@ -489,6 +496,10 @@ class Study(AbstractStudy):
         env_args_list = benchmark.env_args_list
         if demo_mode:
             set_demo_mode(env_args_list)
+        if cdp_server_port:
+            set_cdp_server(env_args_list, port=cdp_server_port)
+        if not headless:
+            set_headfull(env_args_list)
 
         exp_args_list = []
 
@@ -725,6 +736,15 @@ def set_demo_mode(env_args_list: list[EnvArgs]):
         env_args.wait_for_user_message = False
         env_args.slow_mo = 1000
 
+def set_cdp_server(env_args_list: list[EnvArgs], port=9222):
+    """Set the CDP server for the experiments. This can be useful for debugging or for running the experiments on a remote server."""
+    for env_args in env_args_list:
+        env_args.cdp_port = port
+        
+def set_headfull(env_args_list: list[EnvArgs]):
+    """Set the headfull mode for the experiments."""
+    for env_args in env_args_list:
+        env_args.headless = False
 
 def _convert_env_args(env_args_list) -> list[EnvArgs]:
     """Return a list where every element is the *new* EnvArgs.

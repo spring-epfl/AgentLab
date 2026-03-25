@@ -45,6 +45,7 @@ class EnvArgs(DataClassJsonMixin):
     record_video: bool = False
     wait_for_user_message: bool = False
     viewport: Optional[dict] = None  # use default value from BrowserGym
+    cdp_port: Optional[int] = None  # use default value from BrowserGym
     slow_mo: Optional[int] = None  # use default value from BrowserGym
     storage_state: Optional[str | Path | dict] = None
     task_kwargs: Optional[dict] = None  # use default value from BrowserGym
@@ -70,6 +71,8 @@ class EnvArgs(DataClassJsonMixin):
             extra_kwargs["record_video_dir"] = exp_dir
         if self.viewport:
             extra_kwargs["viewport"] = self.viewport
+        if self.cdp_port:
+            extra_kwargs["cdp_port"] = self.cdp_port
         if self.slow_mo is not None:
             extra_kwargs["slow_mo"] = self.slow_mo
         if self.pre_observation_delay is not None:
